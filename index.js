@@ -35,6 +35,7 @@ io.on('connection', (socket) => {
 		// Get the user
 		const user = getUser(socket.id)
 
+		
 		// Filter profanity from the user's message if there are any
 		const filter = new Filter()
 		if (filter.isProfane(newMessage)) {
@@ -68,13 +69,49 @@ io.on('connection', (socket) => {
 
 		// Broadcast to chatroom that user has joined a gameroom
 
-		io.to(user.room).emit('message', generateMessage(`${user.username} has joined ${user.gameroom}`, 'Admin'))
+		io.to(user.room).emit('message', generateMessage(`${user.username} has joined ${user.gameroom}`, 'Game Master'))
 		
 		io.to(user.room).emit('gameRoomDetails', {
-			room: user.room,
+			gameroom: user.gameroom,
 			users: getUsersInRoom(undefined, user.gameroom)
 		})
 
+		callback()
+	})
+
+	socket.on('leaveGameRoom', (callback) => {
+		// Get the current user data
+		const currentUser = getUser(socket.id)
+		const gameroom = currentUser.gameroom
+		// Remove gameroom from user data
+		const { user, error } = updateUser({ id: socket.id, username: currentUser.username, room: currentUser.room, gameroom: undefined })
+		
+		if (error) {
+			return callback(error)
+		}
+
+		if (user) {
+			io.to(user.room).emit('message', generateMessage(`${user.username} has left ${gameroom}`, 'Game Master'))
+		}
+		callback()
+	})
+	socket.on('newMove', (newMove, callback) => {
+		// Get the user
+		const user = getUser(socket.id)
+		//I STOPPED HERE
+		/* if (playerTurn && newMove.chosenSymbol === 'X') {
+			// Send user's message to room of client
+			io.to(user.gameroom).emit('gameMoves', newMove)
+			playerTurn = !playerTurn
+			console.log(playerTurn)
+		} else if (!playerTurn && newMove.chosenSymbol === 'O') {
+			io.to(user.gameroom).emit('gameMoves', newMove)
+			playerTurn = !playerTurn
+		} else {
+			return callback('It\'s the other player\'s turn!')
+		} */
+		io.to(user.gameroom).emit('gameMoves', newMove)
+		playerTurn = !playerTurn
 		callback()
 	})
 

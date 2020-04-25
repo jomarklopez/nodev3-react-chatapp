@@ -7,10 +7,7 @@ import ChatBox from './ChatComponents/ChatBox';
 import userContext from './userContext';
 
 const ChatRoomPage = (props) => {
-    // Create a state for the input element's values
-    // Create a state containing the message history
     // Upon mounting, join the specified room
-
     useEffect(() => {
         const { username, room } = props.location.state;
         socket.emit('joinRoom', { username, room }, (error) => {

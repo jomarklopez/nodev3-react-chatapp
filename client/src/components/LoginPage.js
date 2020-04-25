@@ -19,7 +19,7 @@ const LoginPage = (props) => {
     return (
         <div className="centered-form">
             <div className="centered-form__box">
-                <h1>Join</h1>
+                <h1>This Cord</h1>
                 <form>
                     <label>Display Name</label>
                     <input

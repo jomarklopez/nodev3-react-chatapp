@@ -16,6 +16,7 @@ const ChatBox = (props) => {
     const user = useContext(UserContext);
 
     // Create a reference for the input and submit button elements
+    let lastMessageDummy = useRef(null);
     const inputMessage = useRef(null);
     const submitButton = useRef(null);
 
@@ -24,6 +25,7 @@ const ChatBox = (props) => {
         socket.on('message', (messageObject) => {
             updateMessageHistory(messageObject);
         });
+        lastMessageDummy.scrollIntoView();
     });
 
     // SOCKET FUNCTIONS
@@ -38,7 +40,7 @@ const ChatBox = (props) => {
         socket.emit('newMessage', message, (error) => {
             submitButton.current.removeAttribute('disabled');
             if (error) {
-                return console.log(error);
+                alert(error);
             }
             console.log('The message was delivered');
             inputMessage.current.value = '';
@@ -111,7 +113,7 @@ const ChatBox = (props) => {
                 >
                     <div className="arrow"></div>
                 </div>
-                <ul
+                <div
                     className={
                         chatDisplay
                             ? 'chat__messages chat__messages-expand'
@@ -119,7 +121,13 @@ const ChatBox = (props) => {
                     }
                 >
                     {renderChat(user)}
-                </ul>
+                    <div
+                        style={{ float: 'left', clear: 'both' }}
+                        ref={(el) => {
+                            lastMessageDummy = el;
+                        }}
+                    ></div>
+                </div>
                 <div className="compose">
                     <form
                         className={
@@ -136,6 +144,7 @@ const ChatBox = (props) => {
                             onClick={!chatDisplay ? toggleShowHide : null}
                             className="input"
                             name="message"
+                            autoComplete="off"
                         />
                         <button
                             className={

@@ -171,6 +171,11 @@ input {
     padding: 55px 24px 0 24px;
     overflow-y: scroll;
     transition: 0.3s ease-in;
+    overflow: -moz-scrollbars-none;
+    -ms-overflow-style: none;
+}
+.chat__messages::-webkit-scrollbar {
+    width: 0 !important;
 }
 
 .chat__messages-expand {
@@ -235,8 +240,7 @@ input {
 .compose {
     display: flex;
     flex-shrink: 0;
-    margin-top: 16px;
-    padding: 24px;
+    padding: 10px 24px;
 }
 
 .compose .message__input {
@@ -260,7 +264,7 @@ input {
 .compose .send__button {
     display: flex;
     right: 25vw;
-    bottom: 31px;
+    bottom: 17px;
     position: absolute;
     background: none;
     align-items: center;
@@ -314,11 +318,22 @@ input {
 }
 
 .game__container-sidebar {
-    height: 100vh;
     color: white;
     background: #333744;
-    width: 225px;
     overflow-y: scroll;
+}
+
+.leavegame__btn {
+    display: block;
+    cursor: pointer;
+    padding: 12px;
+    background: #bf5c5c;
+    border: none;
+    color: white;
+    font-size: 16px;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    text-align: center;
 }
 
 /* GAME CHOICES STYLES */
@@ -345,25 +360,44 @@ input {
 }
 
 /* TIC TAC TOE STYLES */
-.TicTacToe__container {
+.tictactoe__container {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+.choose__btns-container {
+    display: flex;
+    margin: 10px auto;
+}
+
+.choose__btns-container button {
+    width: 25px;
+    margin: 0px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    outline: none;
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.game__btns {
     display: grid;
     grid-template-columns: 100px 100px 100px;
     grid-gap: 5px;
     grid-template-rows: 100px 100px 100px;
-
-    margin: 0 auto;
 }
 
 .grid-item {
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.8);
-    padding: 20px;
     font-size: 30px;
     text-align: center;
 
     background-color: white;
     border: none;
-    color: #ffffff;
+    color: #000000;
     cursor: pointer;
 }
 

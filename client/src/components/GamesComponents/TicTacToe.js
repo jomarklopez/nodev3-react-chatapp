@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import socket from '../socket';
 
 const TicTacToe = () => {
     /**
@@ -22,54 +23,107 @@ const TicTacToe = () => {
      *  - If there is a winner then send to clients via chat message the name of the winner and also send to the game state that the game is finished and there is a declared winner.
      */
 
+    const [playerMoves, setPlayerMoves] = useState([
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' '
+    ]);
+    const [chosenSymbol, setChosenSymbol] = useState('');
+
+    useEffect(() => {
+        socket.on('gameMoves', (moves) => {
+            updateGameMoves(moves);
+        });
+    });
+    // STATE FUNCTIONS
+
+    function updateGameMoves({ index, chosenSymbol }) {
+        // Add message object containing the text, creation date, and username of sender
+        // Moves determine in which index should the symbol be placed
+        let newPlayerMoves = [...playerMoves];
+        newPlayerMoves[index] = chosenSymbol;
+        setPlayerMoves(newPlayerMoves);
+    }
+
+    function onSymbolSelect(symbol) {
+        setChosenSymbol(symbol);
+    }
+
+    // SOCKET FUNCTIONS
+
+    function sendPlayerMove(move) {
+        if (playerMoves[move.index] === ' ') {
+            socket.emit('newMove', move, (error) => {
+                if (error) {
+                    return console.log(error);
+                }
+                console.log('The move was delivered');
+            });
+        }
+    }
+
+    // RENDER FUNCTIONS
+    function renderChooseButtons() {
+        if (!chosenSymbol) {
+            return (
+                <>
+                    <button
+                        type="choose__btn"
+                        onClick={() => onSymbolSelect('X')}
+                    >
+                        X
+                    </button>
+                    <div>OR</div>
+                    <button
+                        type="choose__btn"
+                        onClick={() => onSymbolSelect('O')}
+                    >
+                        O
+                    </button>
+                </>
+            );
+        }
+    }
+    function renderButtons() {
+        if (chosenSymbol) {
+            return (
+                <div className="game__btns">
+                    {playerMoves.map((content, index = 0) => {
+                        return (
+                            <div
+                                id={index}
+                                key={index}
+                                className="grid-item"
+                                onClick={() => {
+                                    sendPlayerMove({ index, chosenSymbol });
+                                }}
+                            >
+                                <p>{content}</p>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        } else {
+            return <h1> Please select your symbols </h1>;
+        }
+    }
+
     return (
-        <div className="TicTacToe__container">
-            <div
-                id="b1"
-                className="grid-item"
-                onClick={() => console.log('1')}
-            ></div>
-            <div
-                id="b2"
-                className="grid-item"
-                onClick={() => console.log('2')}
-            ></div>
-            <div
-                id="b3"
-                className="grid-item"
-                onClick={() => console.log('3')}
-            ></div>
-            <div
-                id="b4"
-                className="grid-item"
-                onClick={() => console.log('4')}
-            ></div>
-            <div
-                id="b5"
-                className="grid-item"
-                onClick={() => console.log('5')}
-            ></div>
-            <div
-                id="b6"
-                className="grid-item"
-                onClick={() => console.log('6')}
-            ></div>
-            <div
-                id="b7"
-                className="grid-item"
-                onClick={() => console.log('7')}
-            ></div>
-            <div
-                id="b8"
-                className="grid-item"
-                onClick={() => console.log('8')}
-            ></div>
-            <div
-                id="b9"
-                className="grid-item"
-                onClick={() => console.log('9')}
-            ></div>
-        </div>
+        <>
+            <div className="tictactoe__container">
+                <div className="choose__btns-container">
+                    {renderChooseButtons()}
+                </div>
+                {renderButtons()}
+            </div>
+        </>
     );
 };
 

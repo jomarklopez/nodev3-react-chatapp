@@ -6,21 +6,21 @@ const GameChoices = (props) => {
             <div
                 id="b1"
                 className="game-choice"
-                onClick={() => props.onGameSelect('TicTacToe')}
+                onClick={() => props.onGameSelect('tictactoe')}
             >
                 Tic Tac Toe
             </div>
             <div
                 id="b2"
                 className="game-choice"
-                onClick={() => props.onGameSelect('ChortleMyBalls')}
+                onClick={() => props.onGameSelect('chortlemyballs')}
             >
                 Chortle My Balls
             </div>
             <div
                 id="b3"
                 className="game-choice"
-                onClick={() => props.onGameSelect('MemoryGame')}
+                onClick={() => props.onGameSelect('memorygame')}
             >
                 MemoryGame
             </div>

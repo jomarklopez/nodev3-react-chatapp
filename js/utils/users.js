@@ -41,7 +41,7 @@ const updateUser = (data) => {
 		}
 	}
 
-	updates.forEach(update => user[update] = data[update].trim().toLowerCase())
+	updates.forEach(update => user[update] = data[update])
 	return { user }
 }
 
@@ -55,7 +55,9 @@ const removeUser = (id) => {
 }
 
 const getUser = (id) => {
+	
 	return users.find(user => user.id === id)
+	
 }
 
 const getUsersInRoom = (room, gameroom) => {

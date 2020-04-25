@@ -1,0 +1,371 @@
+/* General Styles */
+
+* {
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+input {
+    font-size: 14px;
+}
+
+body {
+    line-height: 1.4;
+    margin: 0;
+    color: #333333;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+h1 {
+    margin-bottom: 16px;
+}
+label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #777;
+}
+
+input {
+    border: 1px solid #eeeeee;
+    padding: 12px;
+    outline: none;
+}
+
+/* Join Page Styles */
+
+.centered-form {
+    background: #333744;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.centered-form__box {
+    box-shadow: 0px 0px 17px 1px #1d1f26;
+    background: #f7f7fa;
+    padding: 24px;
+    width: 250px;
+}
+
+.centered-form button {
+    width: 100%;
+}
+
+.centered-form input {
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.join__button {
+    display: block;
+    cursor: pointer;
+    padding: 12px;
+    background: #7c5cbf;
+    border: none;
+    color: white;
+    font-size: 16px;
+    transition: background 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+}
+
+.join__button:hover {
+    background: #6b47b8;
+}
+
+/* Chat Page Layout */
+
+.main {
+    display: flex;
+    height: 100vh;
+}
+
+/* Chat styles */
+
+.chat__main {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    right: -23vw;
+    background-color: #fff;
+    box-shadow: 0px -4px 24px 2px rgba(0, 0, 0, 0.15);
+    transition: 0.5s;
+}
+
+.chat__main-expand {
+    right: 0vw;
+}
+
+/* Chat Display Button Style */
+.chatdisplay__button {
+    position: absolute;
+    padding: 1rem;
+    border-radius: 4rem;
+    background: dodgerblue;
+    cursor: pointer;
+    transition: 0.25s;
+    margin: 0.5rem;
+    right: 94%;
+}
+
+.chatdisplay__button:active {
+    background: #005db7;
+    transition: 0;
+}
+
+.arrow {
+    position: relative;
+    background: whitesmoke;
+    width: 1.5rem;
+    height: 0.3rem;
+    transition: 0.5s;
+    border-radius: 1rem;
+    transform-origin: right center;
+}
+.arrow:before {
+    transform: rotate(-35deg);
+}
+.arrow:after {
+    transform: rotate(35deg);
+}
+.arrow:before,
+.arrow:after {
+    display: block;
+    content: '';
+    position: absolute;
+    left: 0;
+    background: whitesmoke;
+    width: 1.3rem;
+    height: 0.3rem;
+    transform-origin: 0.15rem center;
+    transition: 0.5s;
+    border-radius: 1rem;
+}
+
+.switch.right .arrow:before,
+.switch.right .arrow:after {
+    left: 1.3rem;
+}
+.switch.right .arrow:before {
+    transform: rotate(140deg);
+}
+.switch.right .arrow:after {
+    transform: rotate(-140deg);
+}
+
+/* MESSAGES CONTAINER */
+.chat__messages {
+    flex-grow: 1;
+    width: 54%;
+    padding: 55px 24px 0 24px;
+    overflow-y: scroll;
+    transition: 0.3s ease-in;
+}
+
+.chat__messages-expand {
+    width: 100%;
+    transition: 0.3s ease-in;
+}
+
+.message__content {
+    overflow-wrap: break-word;
+}
+
+.input {
+    border-radius: 20px;
+}
+
+/* Message Styles */
+
+.message {
+    margin-bottom: 16px;
+    background-color: #f3f3f3;
+    padding: 5px 15px;
+    border-radius: 15px;
+}
+
+.message {
+    float: left;
+    width: 75%;
+    margin-bottom: 16px;
+    background-color: #f3f3f3;
+    padding: 5px 15px;
+    border-radius: 15px;
+}
+
+.message__user {
+    float: right;
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.message__name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-right: 8px;
+}
+
+.message__meta {
+    color: black;
+    font-size: 14px;
+    float: right;
+}
+
+.message__user .message__meta {
+    color: white;
+}
+
+.message a {
+    color: #0070cc;
+}
+
+/* Message Composition Styles */
+
+.compose {
+    display: flex;
+    flex-shrink: 0;
+    margin-top: 16px;
+    padding: 24px;
+}
+
+.compose .message__input {
+    display: flex;
+    width: 24vw;
+    transition: 0.3s ease-in;
+}
+
+.compose .message__input-expand {
+    width: 100vw;
+    transition: 0.3s ease-in;
+}
+
+.compose input {
+    border: 1px solid #eeeeee;
+    width: 100%;
+    padding: 15px;
+    flex-grow: 1;
+}
+
+.compose .send__button {
+    display: flex;
+    right: 25vw;
+    bottom: 31px;
+    position: absolute;
+    background: none;
+    align-items: center;
+
+    cursor: pointer;
+    background-color: Transparent;
+    border: none;
+    outline: none;
+
+    transition: 0.3s ease-in;
+}
+
+.compose .send__button i {
+    font-size: 35px;
+    color: cornflowerblue;
+}
+
+.compose .send__button-expand {
+    right: 45px;
+    transition: 0.3s ease-in;
+}
+
+/* Chat Sidebar Styles */
+
+.room-title {
+    font-weight: 400;
+    font-size: 22px;
+    background: #2c2f3a;
+    padding: 24px;
+}
+
+.list-title {
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 4px;
+    padding: 12px 24px 0 24px;
+}
+
+.users {
+    list-style-type: none;
+    font-weight: 300;
+    padding: 12px 24px 0 24px;
+}
+
+/* GAME CONTAINER STYLES */
+.game__container {
+    display: flex;
+    align-items: center;
+    width: 73%;
+    background-color: #f3f3f3;
+}
+
+.game__container-sidebar {
+    height: 100vh;
+    color: white;
+    background: #333744;
+    width: 225px;
+    overflow-y: scroll;
+}
+
+/* GAME CHOICES STYLES */
+.game-choices-container {
+    display: grid;
+    grid-template-columns: 200px 200px 200px;
+    grid-template-rows: 150px;
+    grid-gap: 5px;
+
+    margin: 0 auto;
+}
+
+.game-choices-container .game-choice {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    font-size: 1rem;
+    text-align: center;
+
+    background-color: white;
+    border: none;
+    color: black;
+    cursor: pointer;
+    padding: 10px;
+}
+
+/* TIC TAC TOE STYLES */
+.TicTacToe__container {
+    display: grid;
+    grid-template-columns: 100px 100px 100px;
+    grid-gap: 5px;
+    grid-template-rows: 100px 100px 100px;
+
+    margin: 0 auto;
+}
+
+.grid-item {
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+
+    background-color: white;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.grid-item :hover {
+}

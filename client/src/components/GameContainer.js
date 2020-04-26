@@ -8,10 +8,8 @@ import TicTacToe from './GamesComponents/TicTacToe';
 const GameContainer = (props) => {
     // Initial state
     const [gameSelected, setGameSelected] = useState();
-    // Get user details from userContext
 
     useEffect(() => {
-        // Use consumer to pass the user's details
         if (gameSelected) {
             socket.emit('joinGameRoom', { gameroom: gameSelected }, (error) => {
                 if (error) {

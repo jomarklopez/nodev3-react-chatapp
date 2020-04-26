@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../socket';
 
-const GameContainerSideBar = (props) => {
+const GameSidebar = (props) => {
     const [roomDetails, setRoomDetails] = useState({
         gameTitle: '',
         players: []
@@ -9,9 +9,15 @@ const GameContainerSideBar = (props) => {
 
     // Upon mounting, check for message received from the server and join the specified room
     useEffect(() => {
+        let mounted = true;
+
         socket.on('gameRoomDetails', (details) => {
-            updateRoomDetails(details);
+            if (mounted) {
+                updateRoomDetails(details);
+            }
         });
+
+        return () => (mounted = false);
     });
 
     // SOCKET FUNCTIONS
@@ -49,4 +55,4 @@ const GameContainerSideBar = (props) => {
     );
 };
 
-export default GameContainerSideBar;
+export default GameSidebar;

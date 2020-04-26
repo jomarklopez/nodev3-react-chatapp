@@ -1,17 +1,15 @@
 const express = require('express')
-const http = require('http')
-const socketio = require('socket.io')
+const app = express()
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, { wsEngine: 'ws' })
 const Filter = require('bad-words')
 const { addUser, updateUser,removeUser, getUser, getUsersInRoom } = require('./js/utils/users')
 const { generateMessage } = require('./js/utils/messages')
 
-const app = express()
-const server = http.createServer(app)
-const io = socketio(server)
-
 const port = process.env.PORT || 3001
 
 io.on('connection', (socket) => {
+	console.log('New WebSocket connection')
 
 	socket.on('joinRoom', ({ username, room }, callback) => {
 		// Create a user, return an error if failed
@@ -48,6 +46,7 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('disconnect', () => {
+		console.log('Disconnected!')
 		const user = removeUser(socket.id)
 		if (user) {
 			io.to(user.room).emit('message', generateMessage(`${user.username} has left the room!`, 'ADMIN'))
@@ -95,23 +94,18 @@ io.on('connection', (socket) => {
 		}
 		callback()
 	})
-	socket.on('newMove', (newMove, callback) => {
+
+	socket.on('newMove', (data, callback) => {
 		// Get the user
 		const user = getUser(socket.id)
-		//I STOPPED HERE
-		/* if (playerTurn && newMove.chosenSymbol === 'X') {
-			// Send user's message to room of client
-			io.to(user.gameroom).emit('gameMoves', newMove)
-			playerTurn = !playerTurn
-			console.log(playerTurn)
-		} else if (!playerTurn && newMove.chosenSymbol === 'O') {
-			io.to(user.gameroom).emit('gameMoves', newMove)
-			playerTurn = !playerTurn
+		if ((data.matchMoves % 2 != 0) && data.move.chosenSymbol === 'X') {
+			io.to(user.gameroom).emit('gameMoves', { matchMoves: data.matchMoves+1, move: data.move})
+
+		} else if ((data.matchMoves % 2 == 0) && data.move.chosenSymbol === 'O') {
+			io.to(user.gameroom).emit('gameMoves', { matchMoves: data.matchMoves+1, move: data.move })
 		} else {
 			return callback('It\'s the other player\'s turn!')
-		} */
-		io.to(user.gameroom).emit('gameMoves', newMove)
-		playerTurn = !playerTurn
+		}
 		callback()
 	})
 

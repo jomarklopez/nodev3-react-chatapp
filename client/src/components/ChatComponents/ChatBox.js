@@ -1,12 +1,11 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import Moment from 'react-moment';
 
+import ChatInput from './ChatInput';
 import socket from '../socket';
 import UserContext from '../userContext';
 
 const ChatBox = (props) => {
-    // Create a state for the input element's values
-    const [inputValue, setInputValue] = useState('');
     // Create a state containing the message history
     const [messageHistory, setMessageHistory] = useState([]);
     // Create a state containing initial values for displaying the chatbox
@@ -17,8 +16,6 @@ const ChatBox = (props) => {
 
     // Create a reference for the input and submit button elements
     let lastMessageDummy = useRef(null);
-    const inputMessage = useRef(null);
-    const submitButton = useRef(null);
 
     // Upon mounting, check for message received from the server and join the specified room
     useEffect(() => {
@@ -26,6 +23,9 @@ const ChatBox = (props) => {
             updateMessageHistory(messageObject);
         });
         lastMessageDummy.scrollIntoView();
+        return () => {
+            socket.off();
+        };
     });
 
     // SOCKET FUNCTIONS
@@ -36,28 +36,16 @@ const ChatBox = (props) => {
     }
 
     // Use the socket emit
-    function sendMessage(message) {
+    function sendMessage(message, inputMessageRef, submitButtonRef) {
         socket.emit('newMessage', message, (error) => {
-            submitButton.current.removeAttribute('disabled');
+            submitButtonRef.current.removeAttribute('disabled');
             if (error) {
                 alert(error);
             }
             console.log('The message was delivered');
-            inputMessage.current.value = '';
-            setInputValue('');
-            inputMessage.current.focus();
+            inputMessageRef.current.value = '';
+            inputMessageRef.current.focus();
         });
-    }
-
-    // FORM
-    function onInputChange(e) {
-        setInputValue(e.target.value);
-    }
-
-    function handleSubmit(e) {
-        e.preventDefault();
-        submitButton.current.setAttribute('disabled', 'disabled');
-        sendMessage(inputValue);
     }
 
     // Show chat messages
@@ -128,38 +116,11 @@ const ChatBox = (props) => {
                         }}
                     ></div>
                 </div>
-                <div className="compose">
-                    <form
-                        className={
-                            chatDisplay
-                                ? 'message__input message__input-expand'
-                                : 'message__input'
-                        }
-                        onSubmit={handleSubmit}
-                    >
-                        <input
-                            ref={inputMessage}
-                            value={inputValue}
-                            onChange={onInputChange}
-                            onClick={!chatDisplay ? toggleShowHide : null}
-                            className="input"
-                            name="message"
-                            autoComplete="off"
-                        />
-                        <button
-                            className={
-                                chatDisplay
-                                    ? 'send__button send__button-expand'
-                                    : 'send__button'
-                            }
-                            ref={submitButton}
-                            id="submit"
-                            type="submit"
-                        >
-                            <i className="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                </div>
+                <ChatInput
+                    send={sendMessage}
+                    toggleShowHide={toggleShowHide}
+                    chatDisplay={chatDisplay}
+                />
             </div>
         </>
     );

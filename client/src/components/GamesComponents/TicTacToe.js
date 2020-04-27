@@ -37,20 +37,39 @@ const TicTacToe = () => {
     const [matchMoves, setMatchMoves] = useState(1);
     const [chosenSymbol, setChosenSymbol] = useState('');
     const [playerMoves, setPlayerMoves] = useState([]);
-    const [gameFinish, setGameFinish] = useState({
-        inGame: false,
+    const [gameState, setGameState] = useState({
+        gameOver: false,
+        playerNums: 0,
         winner: null
     });
 
     useEffect(() => {
+        console.log(playerMoves);
         socket.on('gameMoves', ({ matchMoves, move }) => {
             updateGameMoves({ matchMoves, move });
+        });
+
+        socket.on('gameOver', (winner) => {
+            setGameState({
+                gameOver: true,
+                playerNums: 0,
+                winner
+            });
         });
 
         return () => {
             socket.off();
         };
     });
+
+    useEffect(() => {
+        socket.emit('checkWin', playerMoves, (error) => {
+            if (error) {
+                alert(error);
+            }
+            console.log('Player moves was delivered');
+        });
+    }, [playerMoves]);
     // GAME STATE FUNCTIONS
 
     function updateGameMoves({ matchMoves, move }) {
@@ -61,13 +80,6 @@ const TicTacToe = () => {
         setGameboard(newPlayerMoves);
         setMatchMoves(matchMoves);
         addPlayerMove(move);
-        // Check for winner
-        if (checkWin() && !gameFinish.inGame) {
-            setGameFinish({
-                inGame: true,
-                winner: `${chosenSymbol} WINS!`
-            });
-        }
     }
 
     function onSymbolSelect(symbol) {
@@ -80,67 +92,11 @@ const TicTacToe = () => {
         }
     }
 
-    function checkWin() {
-        const horizontalCheckPatterns = [
-            [0, 1, 2],
-            [3, 4, 5],
-            [6, 7, 8]
-        ];
-        const verticalCheckPatterns = [
-            [0, 3, 6],
-            [1, 4, 7],
-            [2, 5, 8]
-        ];
-        const diagonalCheckPatterns = [
-            [0, 4, 8],
-            [2, 4, 6]
-        ];
-
-        // Iterate through possible horizontal patterns
-        for (let pattern of horizontalCheckPatterns) {
-            // Checks if a pattern matches with the player's moveset
-            for (let n of pattern) {
-                if (!playerMoves.includes(n)) {
-                    break;
-                }
-                if (n === pattern[pattern.length - 1]) {
-                    return true;
-                }
-            }
-        }
-
-        // Iterate through possible vertical patterns
-        for (let pattern of verticalCheckPatterns) {
-            // Checks if a pattern matches with the player's moveset
-            for (let n of pattern) {
-                if (!playerMoves.includes(n)) {
-                    break;
-                }
-                if (n === pattern[pattern.length - 1]) {
-                    return true;
-                }
-            }
-        }
-
-        // Iterate through possible diagonal patterns
-        for (let pattern of diagonalCheckPatterns) {
-            // Checks if a pattern matches with the player's moveset
-            for (let n of pattern) {
-                if (!playerMoves.includes(n)) {
-                    break;
-                }
-                if (n === pattern[pattern.length - 1]) {
-                    return true;
-                }
-            }
-        }
-    }
-
     // SOCKET FUNCTIONS
 
     function sendPlayerMove(move) {
         // If there is no placement at the gameboard then emit the move
-
+        // Check for winner
         if (gameboard[move.index] === ' ') {
             socket.emit('newMove', { matchMoves, move }, (error) => {
                 if (error) {
@@ -176,7 +132,7 @@ const TicTacToe = () => {
         }
     }
     function renderButtons() {
-        if (chosenSymbol && !gameFinish.inGame) {
+        if (chosenSymbol && !gameState.gameOver) {
             return (
                 <div className="game__btns">
                     {gameboard.map((content, index = 0) => {
@@ -195,8 +151,15 @@ const TicTacToe = () => {
                     })}
                 </div>
             );
-        } else if (gameFinish.inGame) {
-            return <h1>{gameFinish.winner}</h1>;
+        } else if (gameState.gameOver) {
+            return (
+                <>
+                    <h1>{gameState.winner} wins!</h1>
+                    <button onClick={console.log('play again!')}>
+                        Play Again?
+                    </button>
+                </>
+            );
         } else {
             return <h1> Please select your symbols </h1>;
         }

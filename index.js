@@ -5,6 +5,7 @@ const io = require('socket.io')(server, { wsEngine: 'ws' })
 const Filter = require('bad-words')
 const { addUser, updateUser,removeUser, getUser, getUsersInRoom } = require('./js/utils/users')
 const { generateMessage } = require('./js/utils/messages')
+const { checkWin } = require('./js/utils/tictactoe')
 
 const port = process.env.PORT || 3001
 
@@ -95,9 +96,11 @@ io.on('connection', (socket) => {
 		callback()
 	})
 
+
 	socket.on('newMove', (data, callback) => {
 		// Get the user
 		const user = getUser(socket.id)
+
 		if ((data.matchMoves % 2 != 0) && data.move.chosenSymbol === 'X') {
 			io.to(user.gameroom).emit('gameMoves', { matchMoves: data.matchMoves+1, move: data.move})
 
@@ -108,6 +111,18 @@ io.on('connection', (socket) => {
 		}
 		callback()
 	})
+
+	socket.on('checkWin', (data, callback) => {
+		// Get the user
+		const user = getUser(socket.id)
+
+		if (checkWin(data)) {
+			io.to(user.gameroom).emit('gameOver',  user.username )
+		}
+
+		callback()
+	})
+
 
 })
 

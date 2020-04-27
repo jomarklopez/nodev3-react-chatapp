@@ -13,16 +13,9 @@ const GameChoices = (props) => {
             <div
                 id="b2"
                 className="game-choice"
-                onClick={() => props.onGameSelect('chortlemyballs')}
+                onClick={() => props.onGameSelect('blackjack')}
             >
-                Chortle My Balls
-            </div>
-            <div
-                id="b3"
-                className="game-choice"
-                onClick={() => props.onGameSelect('memorygame')}
-            >
-                MemoryGame
+                Black Jack
             </div>
         </div>
     );

@@ -40,7 +40,7 @@ const LoginPage = (props) => {
                     <Link
                         className="join__button"
                         to={{
-                            pathname: '/chatroom',
+                            pathname: '/',
                             state: {
                                 username: inputValue.username,
                                 room: inputValue.room

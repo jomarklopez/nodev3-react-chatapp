@@ -60,15 +60,10 @@ const getUser = (id) => {
 	
 }
 
-const getUsersInRoom = (room, gameroom) => {
-
+const getUsersInRoom = (room) => {
 	if (room) {
 		return users.filter((user) => user.room === room.trim().toLowerCase())
 	}
-	if (gameroom) {
-		return users.filter((user) => user.gameroom === gameroom.trim().toLowerCase())
-	}
-	
 }
 
 module.exports = {

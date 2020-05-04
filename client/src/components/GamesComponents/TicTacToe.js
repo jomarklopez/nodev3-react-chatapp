@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+
 import socket from '../socket';
 
-const TicTacToe = () => {
+const TicTacToe = (props) => {
     /**
      * TIC TAC TOE
      *  - Has 6 buttons
@@ -34,67 +35,68 @@ const TicTacToe = () => {
         ' ',
         ' '
     ]);
-    const [matchMoves, setMatchMoves] = useState(1);
-    const [chosenSymbol, setChosenSymbol] = useState('');
-    const [playerMoves, setPlayerMoves] = useState([]);
-    const [gameState, setGameState] = useState({
-        gameOver: false,
-        playerNums: 0,
-        winner: null
+
+    /**
+     *
+     * Create a gamedata state to emit to socketio
+     * This game data will contain every player's information:
+     *  1. Players Data
+     *      a. Chosen Symbols
+     *      b. Moves
+     *  2. Game State
+     *      a. Is the game over
+     *      b. Whose turn it is
+     *      c. Is there a winner
+     *
+     */
+    const [playersData, setPlayersData] = useState([
+        {
+            username: '',
+            symbol: '',
+            playerMoves: []
+        }
+    ]);
+
+    const [gameData, setGameData] = useState({
+        matchMoves: 1,
+        matchOver: false,
+        matchWinner: null
     });
 
-    useEffect(() => {
-        console.log(playerMoves);
+    /* useEffect(() => {
         socket.on('gameMoves', ({ matchMoves, move }) => {
             updateGameMoves({ matchMoves, move });
         });
 
         socket.on('gameOver', (winner) => {
-            setGameState({
-                gameOver: true,
-                playerNums: 0,
-                winner
+            setGameData({
+                players: [
+                    {
+                        symbol: '',
+                        playerMoves: []
+                    }
+                ],
+                game: {
+                    matchOver: true,
+                    matchWinner: winner
+                }
             });
         });
 
         return () => {
             socket.off();
         };
-    });
+    }, [gameData]); */
 
     useEffect(() => {
-        socket.emit('checkWin', playerMoves, (error) => {
-            if (error) {
-                alert(error);
-            }
-            console.log('Player moves was delivered');
+        socket.on('symbolsUpdate', (player) => {
+            setPlayersData([...playersData, player]);
         });
-    }, [playerMoves]);
-    // GAME STATE FUNCTIONS
-
-    function updateGameMoves({ matchMoves, move }) {
-        // Add message object containing the text, creation date, and username of sender
-        // Moves determine in which index should the symbol be placed
-        let newPlayerMoves = [...gameboard];
-        newPlayerMoves[move.index] = move.chosenSymbol;
-        setGameboard(newPlayerMoves);
-        setMatchMoves(matchMoves);
-        addPlayerMove(move);
-    }
-
-    function onSymbolSelect(symbol) {
-        setChosenSymbol(symbol);
-    }
-
-    function addPlayerMove(move) {
-        if (move.chosenSymbol === chosenSymbol) {
-            setPlayerMoves((playerMoves) => [...playerMoves, move.index]);
-        }
-    }
+    });
 
     // SOCKET FUNCTIONS
 
-    function sendPlayerMove(move) {
+    /* function sendPlayerMove(move) {
         // If there is no placement at the gameboard then emit the move
         // Check for winner
         if (gameboard[move.index] === ' ') {
@@ -107,62 +109,51 @@ const TicTacToe = () => {
         } else {
             alert("There's already a symbol there!");
         }
+    } */
+
+    function setPlayerSymbol(symbol) {
+        // Send to the server the player's symbol
+        socket.emit('setPlayerSymbol', symbol, (error) => {
+            if (error) {
+                alert(error);
+            }
+            console.log('The selected symbol was sent');
+        });
     }
 
     // RENDER FUNCTIONS
     function renderChooseButtons() {
-        if (!chosenSymbol) {
-            return (
-                <>
-                    <button
-                        type="choose__btn"
-                        onClick={() => onSymbolSelect('X')}
-                    >
-                        X
-                    </button>
-                    <div>OR</div>
-                    <button
-                        type="choose__btn"
-                        onClick={() => onSymbolSelect('O')}
-                    >
-                        O
-                    </button>
-                </>
-            );
-        }
+        return (
+            <>
+                <button type="choose__btn" onClick={() => setPlayerSymbol('x')}>
+                    X
+                </button>
+                <div>OR</div>
+                <button type="choose__btn" onClick={() => setPlayerSymbol('o')}>
+                    O
+                </button>
+            </>
+        );
     }
     function renderButtons() {
-        if (chosenSymbol && !gameState.gameOver) {
-            return (
-                <div className="game__btns">
-                    {gameboard.map((content, index = 0) => {
-                        return (
-                            <div
-                                id={index}
-                                key={index}
-                                className="grid-item"
-                                onClick={() => {
-                                    sendPlayerMove({ index, chosenSymbol });
-                                }}
-                            >
-                                <p>{content}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            );
-        } else if (gameState.gameOver) {
-            return (
-                <>
-                    <h1>{gameState.winner} wins!</h1>
-                    <button onClick={console.log('play again!')}>
-                        Play Again?
-                    </button>
-                </>
-            );
-        } else {
-            return <h1> Please select your symbols </h1>;
-        }
+        return (
+            <div className="game__btns">
+                {gameboard.map((content, index = 0) => {
+                    return (
+                        <div
+                            id={index}
+                            key={index}
+                            className="grid-item"
+                            onClick={() => {
+                                console.log('Player move sent');
+                            }}
+                        >
+                            <p>{content}</p>
+                        </div>
+                    );
+                })}
+            </div>
+        );
     }
 
     return (

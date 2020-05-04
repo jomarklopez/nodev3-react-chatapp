@@ -93,7 +93,7 @@ input {
     display: flex;
     flex-direction: column;
     height: 100%;
-    width: 50%;
+    width: 43%;
     position: fixed;
     z-index: 10;
     top: 0;
@@ -167,8 +167,8 @@ input {
 /* MESSAGES CONTAINER */
 .chat__messages {
     flex-grow: 1;
-    width: 54%;
-    padding: 55px 24px 0 24px;
+    width: 60%;
+    padding: 50px 15px 0 15px;
     overflow-y: scroll;
     transition: 0.3s ease-in;
     overflow: -moz-scrollbars-none;
@@ -180,7 +180,7 @@ input {
 
 .chat__messages-expand {
     width: 100%;
-    transition: 0.3s ease-in;
+    transition: 0.35s;
 }
 
 .message__content {
@@ -194,25 +194,39 @@ input {
 /* Message Styles */
 
 .message {
-    margin-bottom: 16px;
+    width: 75%;
+    margin-bottom: 10px;
     background-color: #f3f3f3;
-    padding: 5px 15px;
-    border-radius: 15px;
+    padding: 7px 10px;
+    border-radius: 5px;
 }
 
-.message {
-    float: left;
-    width: 75%;
-    margin-bottom: 16px;
-    background-color: #f3f3f3;
-    padding: 5px 15px;
-    border-radius: 15px;
+.message p {
+    margin: 0px;
+}
+
+.message__admin {
+    text-align: center;
+    background: none;
+    padding: 0px;
+    border-radius: 0px;
+    font-size: 0.75em;
 }
 
 .message__user {
-    float: right;
     background-color: cornflowerblue;
     color: white;
+    transition: 0.5s;
+}
+
+.chat__messages-expand .message__user {
+    margin-left: 26%;
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.chat__messages-expand .message__admin {
+    width: 100%;
 }
 
 .message__name {
@@ -235,6 +249,11 @@ input {
     color: #0070cc;
 }
 
+.last__message-dummy {
+    float: 'left';
+    clear: 'both';
+}
+
 /* Message Composition Styles */
 
 .compose {
@@ -245,7 +264,7 @@ input {
 
 .compose .message__input {
     display: flex;
-    width: 24vw;
+    width: 42%;
     transition: 0.3s ease-in;
 }
 
@@ -287,7 +306,15 @@ input {
     transition: 0.3s ease-in;
 }
 
-/* Chat Sidebar Styles */
+/* Sidebar Styles */
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 15vw;
+    color: white;
+    background: #333744;
+}
 
 .room-title {
     font-weight: 400;
@@ -309,18 +336,23 @@ input {
     padding: 12px 24px 0 24px;
 }
 
+.leavechatroom__btn {
+    display: block;
+    cursor: pointer;
+    padding: 10px;
+    background: cornflowerblue;
+    border: none;
+    color: white;
+    font-size: 12px;
+}
+
 /* GAME CONTAINER STYLES */
 .game__container {
     display: flex;
     align-items: center;
-    width: 73%;
+    justify-content: space-evenly;
+    width: 65%;
     background-color: #f3f3f3;
-}
-
-.game__container-sidebar {
-    color: white;
-    background: #333744;
-    overflow-y: scroll;
 }
 
 .leavegame__btn {
@@ -331,15 +363,14 @@ input {
     border: none;
     color: white;
     font-size: 16px;
-    transition: background 0.3s ease;
-    text-decoration: none;
-    text-align: center;
+    align-self: end;
+    margin: 10px 0px 0px 10px;
 }
 
 /* GAME CHOICES STYLES */
 .game-choices-container {
     display: grid;
-    grid-template-columns: 200px 200px 200px;
+    grid-template-columns: 200px 200px;
     grid-template-rows: 150px;
     grid-gap: 5px;
 
@@ -363,7 +394,6 @@ input {
 .tictactoe__container {
     display: flex;
     flex-direction: column;
-    margin: 0 auto;
 }
 
 .choose__btns-container {

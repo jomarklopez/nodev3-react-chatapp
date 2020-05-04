@@ -3,15 +3,15 @@ import { Router, Route } from 'react-router-dom';
 
 import '../styles/app.css';
 import history from '../history';
-import LoginPage from './LoginPage';
-import ChatRoomPage from './ChatRoomPage';
+import LoginPage from './Pages/LoginPage';
+import HomePage from './Pages/HomePage';
 
 const App = (props) => {
     return (
         <>
             <Router history={history}>
-                <Route path="/" exact component={LoginPage} />
-                <Route path="/chatroom" exact component={ChatRoomPage} />
+                <Route path="/" exact component={HomePage} />
+                <Route path="/login" exact component={LoginPage} />
             </Router>
         </>
     );

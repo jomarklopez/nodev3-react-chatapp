@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 
-import socket from './socket';
-import GameSidebar from './GamesComponents/GameSidebar';
-import GameChoices from './GamesComponents/GameChoices';
-import TicTacToe from './GamesComponents/TicTacToe';
+import UserContext from '../UserContext';
+import socket from '../socket';
+import GameChoices from './GameChoices';
+import TicTacToe from './TicTacToe';
 
 const GameContainer = (props) => {
     // Initial state
     const [gameSelected, setGameSelected] = useState();
+    const user = useContext(UserContext);
 
     useEffect(() => {
+        console.log('asd');
         if (gameSelected) {
-            socket.emit('joinGameRoom', { gameroom: gameSelected }, (error) => {
+            const gameroom = user.room + '-' + gameSelected;
+            socket.emit('joinGameRoom', { gameroom }, (error) => {
                 if (error) {
+                    console.log(error);
                     alert(error);
-                    window.location.href = '/chatroom';
+                    window.location.href = '/';
                 }
             });
         }
@@ -24,15 +28,17 @@ const GameContainer = (props) => {
     function onGameSelected(selection) {
         // Set state to the game selected
         setGameSelected(selection);
-
         // TODO: If chat is expanded, then minimize
     }
 
-    function onGameLeave() {
-        // Set state to the game selected
+    function leaveGameRoom() {
+        // Set state to the game selected to undefined
+        socket.emit('leaveGameRoom', (error) => {
+            if (error) {
+                alert(error);
+            }
+        });
         setGameSelected(undefined);
-
-        // TODO: If chat is expanded, then minimize
     }
 
     function renderGame() {
@@ -40,7 +46,9 @@ const GameContainer = (props) => {
         if (gameSelected === 'tictactoe') {
             return (
                 <>
-                    <GameSidebar leaveGame={onGameLeave} />
+                    <button className="leavegame__btn" onClick={leaveGameRoom}>
+                        Leave Game
+                    </button>
                     <TicTacToe />
                 </>
             );

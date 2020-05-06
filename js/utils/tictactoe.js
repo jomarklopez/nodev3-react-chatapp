@@ -6,7 +6,6 @@ const addPlayer = ({ id, username, gameroom }) => {
 	// Clean the data
 	username = username.trim().toLowerCase()
 	gameroom = gameroom.trim().toLowerCase()
-
 	// Check if room is full
 	if (players.length == 2) {
 		return {
@@ -51,16 +50,14 @@ const removePlayer = (id) => {
 	if (index !== -1) {
 		return players.splice(index, 1)[0]
 	}
+	console.log(players)
 }
 
 const getPlayer = (id) => {
-
 	return players.find(player => player.id === id)
-
 }
 
-const getPlayersInRoom = (room, gameroom) => {
-
+const getPlayersInRoom = (gameroom) => {
 	if (gameroom) {
 		return players.filter((player) => player.gameroom === gameroom.trim().toLowerCase())
 	}

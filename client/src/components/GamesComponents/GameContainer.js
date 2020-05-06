@@ -11,7 +11,6 @@ const GameContainer = (props) => {
     const user = useContext(UserContext);
 
     useEffect(() => {
-        console.log('asd');
         if (gameSelected) {
             const gameroom = user.room + '-' + gameSelected;
             socket.emit('joinGameRoom', { gameroom }, (error) => {
@@ -25,13 +24,13 @@ const GameContainer = (props) => {
     });
 
     // Handles game select button action
-    function onGameSelected(selection) {
+    const onGameSelected = (selection) => {
         // Set state to the game selected
         setGameSelected(selection);
         // TODO: If chat is expanded, then minimize
-    }
+    };
 
-    function leaveGameRoom() {
+    const leaveGameRoom = () => {
         // Set state to the game selected to undefined
         socket.emit('leaveGameRoom', (error) => {
             if (error) {
@@ -39,9 +38,9 @@ const GameContainer = (props) => {
             }
         });
         setGameSelected(undefined);
-    }
+    };
 
-    function renderGame() {
+    const renderGame = () => {
         // Render a game based on the gameSelected state
         if (gameSelected === 'tictactoe') {
             return (
@@ -56,7 +55,7 @@ const GameContainer = (props) => {
             // Renders the game choices and passing a function to set the state of game selection
             return <GameChoices onGameSelect={onGameSelected} />;
         }
-    }
+    };
 
     return (
         <div id="game__container" className="game__container">

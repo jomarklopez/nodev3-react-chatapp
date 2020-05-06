@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 
 import socket from '../socket';
+import UserContext from '../UserContext';
 
 const TicTacToe = (props) => {
     /**
@@ -36,62 +37,28 @@ const TicTacToe = (props) => {
         ' '
     ]);
 
-    /**
-     *
-     * Create a gamedata state to emit to socketio
-     * This game data will contain every player's information:
-     *  1. Players Data
-     *      a. Chosen Symbols
-     *      b. Moves
-     *  2. Game State
-     *      a. Is the game over
-     *      b. Whose turn it is
-     *      c. Is there a winner
-     *
-     */
-    const [playersData, setPlayersData] = useState([
-        {
-            username: '',
-            symbol: '',
-            playerMoves: []
-        }
-    ]);
+    const user = useContext(UserContext);
 
+    const [playersData, setPlayersData] = useState([]);
     const [gameData, setGameData] = useState({
+        xPlayer: null,
+        oPlayer: null,
         matchMoves: 1,
         matchOver: false,
         matchWinner: null
     });
 
-    /* useEffect(() => {
-        socket.on('gameMoves', ({ matchMoves, move }) => {
-            updateGameMoves({ matchMoves, move });
-        });
-
-        socket.on('gameOver', (winner) => {
-            setGameData({
-                players: [
-                    {
-                        symbol: '',
-                        playerMoves: []
-                    }
-                ],
-                game: {
-                    matchOver: true,
-                    matchWinner: winner
-                }
-            });
-        });
-
-        return () => {
-            socket.off();
-        };
-    }, [gameData]); */
+    let selectXBtn = useRef(null);
+    let selectOBtn = useRef(null);
 
     useEffect(() => {
-        socket.on('symbolsUpdate', (player) => {
-            setPlayersData([...playersData, player]);
+        socket.on('playersUpdate', (playersData) => {
+            setPlayersData(playersData);
+            // Put labels around the X and O button
         });
+        return () => {
+            socket.off('playersUpdate');
+        };
     });
 
     // SOCKET FUNCTIONS
@@ -111,31 +78,57 @@ const TicTacToe = (props) => {
         }
     } */
 
-    function setPlayerSymbol(symbol) {
-        // Send to the server the player's symbol
-        socket.emit('setPlayerSymbol', symbol, (error) => {
-            if (error) {
-                alert(error);
-            }
-            console.log('The selected symbol was sent');
-        });
-    }
+    const setPlayerSymbol = (symbol) => {
+        // Check first if player has already selected a symbol
+        const player = playersData.filter(
+            (player) => player.username === user.username
+        );
+
+        if (player[0] && player[0].symbol) {
+            console.log('Player has already selected a symbol');
+        } else {
+            // Send to the server the player's symbol
+            socket.emit('setPlayerSymbol', symbol, (error) => {
+                if (error) {
+                    alert(error);
+                }
+                console.log('The selected symbol was sent');
+            });
+        }
+    };
 
     // RENDER FUNCTIONS
-    function renderChooseButtons() {
+
+    const renderChooseButtons = () => {
+        const xPlayer = playersData.filter((player) => player.symbol === 'x');
+        const oPlayer = playersData.filter((player) => player.symbol === 'o');
+
         return (
             <>
-                <button type="choose__btn" onClick={() => setPlayerSymbol('x')}>
-                    X
-                </button>
-                <div>OR</div>
-                <button type="choose__btn" onClick={() => setPlayerSymbol('o')}>
-                    O
-                </button>
+                <div className="xButtonContainer">
+                    <button
+                        type="choose__btn"
+                        onClick={() => setPlayerSymbol('x')}
+                        disabled={xPlayer[0] ? true : false}
+                    >
+                        X
+                    </button>
+                    {xPlayer[0] ? <p>{xPlayer[0].username}</p> : <p></p>}
+                </div>
+                <div className="oButtonContainer">
+                    <button
+                        type="choose__btn"
+                        onClick={() => setPlayerSymbol('o')}
+                        disabled={oPlayer[0] ? true : false}
+                    >
+                        O
+                    </button>
+                    {oPlayer[0] ? <p>{oPlayer[0].username}</p> : <p></p>}
+                </div>
             </>
         );
-    }
-    function renderButtons() {
+    };
+    const renderButtons = () => {
         return (
             <div className="game__btns">
                 {gameboard.map((content, index = 0) => {
@@ -154,7 +147,7 @@ const TicTacToe = (props) => {
                 })}
             </div>
         );
-    }
+    };
 
     return (
         <>

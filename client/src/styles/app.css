@@ -350,7 +350,6 @@ input {
 .game__container {
     display: flex;
     align-items: center;
-    justify-content: space-evenly;
     width: 65%;
     background-color: #f3f3f3;
 }
@@ -398,18 +397,37 @@ input {
 
 .choose__btns-container {
     display: flex;
-    margin: 10px auto;
+    flex-direction: column;
+    align-items: center;
 }
 
+.xButtonContainer,
+.oButtonContainer {
+    text-align: center;
+}
+
+.choose__btns-container p {
+    display: flex;
+    margin: 0;
+}
 .choose__btns-container button {
     width: 25px;
-    margin: 0px 10px;
-    border: none;
     border-radius: 5px;
+    border: 1px solid cornflowerblue;
+    background-color: corn;
+    color: cornflowerblue;
+    font-size: 16px;
     cursor: pointer;
-    outline: none;
+}
+.choose__btns-container button:hover {
     background-color: cornflowerblue;
     color: white;
+}
+
+.choose__btns-container button:disabled {
+    background-color: cornflowerblue;
+    color: white;
+    cursor: default;
 }
 
 .game__btns {

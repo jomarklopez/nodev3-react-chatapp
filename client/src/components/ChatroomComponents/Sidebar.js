@@ -1,13 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const GameSidebar = (props) => {
+import socket from '../socket';
+
+const Sidebar = (props) => {
+    // Create a state containing the message history
+
+    const [roomDetails, setRoomDetails] = useState({
+        roomname: '',
+        users: []
+    });
+
+    // Create a reference for the input and submit button elements
+
+    useEffect(() => {
+        socket.on('roomDetails', (details) => {
+            updateRoomDetails(details);
+        });
+
+        return () => {
+            socket.off('roomDetails');
+        };
+    });
+
+    function updateRoomDetails({ roomname, users }) {
+        setRoomDetails({
+            ...roomDetails,
+            roomname: roomname,
+            users: [...users]
+        });
+    }
+
     function renderContent() {
-        if (props.roomDetails.users.length === 0) {
+        if (roomDetails.users.length === 0) {
             return <div>Loading...</div>;
         } else {
             return (
                 <>
-                    <h2 className="room-title">{props.roomDetails.roomname}</h2>
+                    <h2 className="room-title">{roomDetails.roomname}</h2>
                     <button
                         className="leavechatroom__btn"
                         onClick={() => {
@@ -18,7 +47,7 @@ const GameSidebar = (props) => {
                     </button>
                     <h2 className="list-title">Users</h2>
                     <ul className="users">
-                        {props.roomDetails.users.map((user, index = 0) => {
+                        {roomDetails.users.map((user, index = 0) => {
                             return <li key={index++}>{user.username}</li>;
                         })}
                     </ul>
@@ -30,4 +59,4 @@ const GameSidebar = (props) => {
     return <div className="sidebar">{renderContent()}</div>;
 };
 
-export default GameSidebar;
+export default Sidebar;

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Moment from 'react-moment';
 
 import socket from '../socket';
@@ -7,8 +7,27 @@ import UserContext from '../UserContext';
 
 const Chatbox = (props) => {
     // Create a state containing initial values for displaying the chatbox
+    const [messageHistory, setMessageHistory] = useState([]);
     const [chatDisplay, setChatDisplay] = useState(false);
     const user = useContext(UserContext);
+    let lastMessageDummy = useRef(null);
+
+    useEffect(() => {
+        // Check for message or room details received from server then set state to rerender.
+        socket.on('message', (messageObject) => {
+            updateMessageHistory(messageObject);
+        });
+        lastMessageDummy.scrollIntoView();
+
+        return () => {
+            socket.off('message');
+        };
+    });
+
+    const updateMessageHistory = (messageObject) => {
+        // Add message object containing the text, creation date, and username of sender
+        setMessageHistory([...messageHistory, messageObject]);
+    };
 
     // Toggle chat visibility
     const toggleShowHide = () => {
@@ -16,7 +35,7 @@ const Chatbox = (props) => {
     };
 
     // Use the socket emit
-    function sendMessage(message, inputMessageRef, submitButtonRef) {
+    const sendMessage = (message, inputMessageRef, submitButtonRef) => {
         socket.emit('newMessage', message, (error) => {
             submitButtonRef.current.removeAttribute('disabled');
             if (error) {
@@ -26,11 +45,11 @@ const Chatbox = (props) => {
             inputMessageRef.current.value = '';
             inputMessageRef.current.focus();
         });
-    }
+    };
 
     // Show chat messages
-    function renderChat(user) {
-        return props.messageHistory.map((message, index = 0) => {
+    const renderChat = (user) => {
+        return messageHistory.map((message, index = 0) => {
             if (
                 message.username === 'Admin' ||
                 message.username === 'Game Master'
@@ -68,7 +87,7 @@ const Chatbox = (props) => {
                 );
             }
         });
-    }
+    };
 
     return (
         <div
@@ -97,7 +116,7 @@ const Chatbox = (props) => {
                 <div
                     className="last__message-dummy"
                     style={{ float: 'left', clear: 'both' }}
-                    ref={props.setLastMessageRef}
+                    ref={(e) => (lastMessageDummy = e)}
                 ></div>
             </div>
             <ChatInput

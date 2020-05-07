@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import socket from '../socket';
 import UserContext from '../UserContext';
@@ -25,58 +25,69 @@ const TicTacToe = (props) => {
      *  - If there is a winner then send to clients via chat message the name of the winner and also send to the game state that the game is finished and there is a declared winner.
      */
 
-    const [gameboard, setGameboard] = useState([
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' '
-    ]);
+    const [gameMoveset, setGameMoveset] = useState(null);
 
     const user = useContext(UserContext);
 
     const [playersData, setPlayersData] = useState([]);
-    const [gameData, setGameData] = useState({
-        xPlayer: null,
-        oPlayer: null,
-        matchMoves: 1,
+    const [matchState, setMatchState] = useState({
         matchOver: false,
         matchWinner: null
     });
 
-    let selectXBtn = useRef(null);
-    let selectOBtn = useRef(null);
-
     useEffect(() => {
+        console.log(playersData);
         socket.on('playersUpdate', (playersData) => {
             setPlayersData(playersData);
-            // Put labels around the X and O button
         });
         return () => {
             socket.off('playersUpdate');
         };
     });
 
+    useEffect(() => {
+        if (gameMoveset == null && playersData[0]) {
+            // Initialize gamemoveset from server on first render after receiving playersData
+            socket.emit('initGameMoveset', playersData[0].gameroom, (error) => {
+                if (error) {
+                    alert(error);
+                }
+                console.log('The gamemoveset was requested');
+            });
+        }
+        socket.on('gameMovesetUpdate', (moveset) => {
+            console.log(moveset);
+            setGameMoveset(moveset);
+        });
+        return () => {
+            socket.off('gameMovesetUpdate');
+        };
+    });
+
+    useEffect(() => {
+        socket.on('gameOver', (player) => {
+            alert(player + ' WON!');
+        });
+        return () => {
+            socket.off('gameOver');
+        };
+    });
+
     // SOCKET FUNCTIONS
 
-    /* function sendPlayerMove(move) {
-        // If there is no placement at the gameboard then emit the move
-        // Check for winner
-        if (gameboard[move.index] === ' ') {
-            socket.emit('newMove', { matchMoves, move }, (error) => {
+    const sendPlayerMove = (move) => {
+        console.log(gameMoveset[move]);
+        if (gameMoveset[move] !== ' ') {
+            return alert("Can't place there!");
+        } else {
+            socket.emit('newMove', move, (error) => {
                 if (error) {
                     alert(error);
                 }
                 console.log('The move was delivered');
             });
-        } else {
-            alert("There's already a symbol there!");
         }
-    } */
+    };
 
     const setPlayerSymbol = (symbol) => {
         // Check first if player has already selected a symbol
@@ -98,7 +109,7 @@ const TicTacToe = (props) => {
     };
 
     // RENDER FUNCTIONS
-
+    // TODO SHOW WHOSE TURN IT IS
     const renderChooseButtons = () => {
         const xPlayer = playersData.filter((player) => player.symbol === 'x');
         const oPlayer = playersData.filter((player) => player.symbol === 'o');
@@ -113,7 +124,7 @@ const TicTacToe = (props) => {
                     >
                         X
                     </button>
-                    {xPlayer[0] ? <p>{xPlayer[0].username}</p> : <p></p>}
+                    {xPlayer[0] ? <p>{xPlayer[0].username}</p> : <p>&nbsp;</p>}
                 </div>
                 <div className="oButtonContainer">
                     <button
@@ -123,30 +134,34 @@ const TicTacToe = (props) => {
                     >
                         O
                     </button>
-                    {oPlayer[0] ? <p>{oPlayer[0].username}</p> : <p></p>}
+                    {oPlayer[0] ? <p>{oPlayer[0].username}</p> : <p>&nbsp;</p>}
                 </div>
             </>
         );
     };
     const renderButtons = () => {
-        return (
-            <div className="game__btns">
-                {gameboard.map((content, index = 0) => {
-                    return (
-                        <div
-                            id={index}
-                            key={index}
-                            className="grid-item"
-                            onClick={() => {
-                                console.log('Player move sent');
-                            }}
-                        >
-                            <p>{content}</p>
-                        </div>
-                    );
-                })}
-            </div>
-        );
+        if (gameMoveset) {
+            return (
+                <div className="game__btns">
+                    {gameMoveset.map((content, index = 0) => {
+                        return (
+                            <div
+                                id={index}
+                                key={index}
+                                className="grid-item"
+                                onClick={() => {
+                                    sendPlayerMove(index);
+                                }}
+                            >
+                                <p>{content}</p>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        } else {
+            return <div>Loading...</div>;
+        }
     };
 
     return (

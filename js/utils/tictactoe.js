@@ -1,68 +1,58 @@
-const players = []
-// Players should have an id, username, gameroom, symbol, moves
-// Add a function to return all the moves made by combining the two player's moves
+let movesets = []
 
-const addPlayer = ({ id, username, gameroom }) => {
-	// Clean the data
-	username = username.trim().toLowerCase()
-	gameroom = gameroom.trim().toLowerCase()
-	// Check if room is full
-	if (players.length == 2) {
+// Moveset contains the game's moves and the game's turns
+const addMoveset = (gameroom) => {
+	const moveset = {
+		[gameroom]: [
+			' ',
+			' ',
+			' ',
+			' ',
+			' ',
+			' ',
+			' ',
+			' ',
+			' '],
+		matchTurn: 0
+	}
+
+	// Check for existing user
+	const existingRoom = movesets.find((moveset) => moveset.gameroom === gameroom)
+	if (existingRoom) {
 		return {
-			addError: 'Two players are currently playing!'
+			error: 'There is an ongoing game!'
 		}
 	}
 
-	// Store the user in the users array
-	const player = { id, username, gameroom }
-	players.push(player)
-
-	// Return the user as an object
-	return { player }
+	movesets.push(moveset)
+	return moveset
 }
 
-const updatePlayer = (data) => {
-	let allowedUpdates
-	const updates = Object.keys(data)
-	// Get user with id
-	const player = players.find(player => player.id === data.id)
-	// Allowed updates on user based on what game they are playing
-	if (player.gameroom.split('-')[1]==='tictactoe') {
-		allowedUpdates = ['id', 'username', 'gameroom', 'symbol', 'moves']
+const updateMoveset = (gameroom, playerMove, symbol) => {
+	const moveset = movesets.find((moveset) => gameroom in moveset)
+
+	moveset[gameroom][playerMove] = symbol
+
+	return moveset
+}
+
+
+const incrementMatchTurn = (gameroom) => {
+	const moveset = movesets.find((moveset) => gameroom in moveset)
+	moveset['matchTurn'] += 1
+}
+
+const getMoveset = (gameroom) => {
+	// If there is no moveset in the room then addMoveset
+	const movesetRoomExists = movesets.find((moveset) => gameroom in moveset)
+
+	if (movesetRoomExists) {
+		return movesetRoomExists
+	} else  {
+		return addMoveset(gameroom)
 	}
-	
-	const isValidOperation = updates.every(update => allowedUpdates.includes(update))
-
-	if (!isValidOperation) {
-		return {
-			error: 'id, username, symbol and gameroom are the allowed updates to the player data'
-		}
-	}
-
-	updates.forEach(update => player[update] = data[update])
-	return { player }
 }
 
-const removePlayer = (id) => {
-	// Look at each users id and return the id of the user that matches
-	const index = players.findIndex((player) => player.id === id)
-	// Check if user exists then remove the user from the users array
-	if (index !== -1) {
-		return players.splice(index, 1)[0]
-	}
-	console.log(players)
-}
-
-const getPlayer = (id) => {
-	return players.find(player => player.id === id)
-}
-
-const getPlayersInRoom = (gameroom) => {
-	if (gameroom) {
-		return players.filter((player) => player.gameroom === gameroom.trim().toLowerCase())
-	}
-
-}
 
 const checkWin = (playerMoves) => {
 	const horizontalCheckPatterns = [
@@ -122,10 +112,9 @@ const checkWin = (playerMoves) => {
 }
 
 module.exports = {
-	addPlayer,
-	updatePlayer,
-	removePlayer,
-	getPlayer,
-	getPlayersInRoom,
+	addMoveset,
+	updateMoveset,
+	getMoveset,
+	incrementMatchTurn,
 	checkWin
 }

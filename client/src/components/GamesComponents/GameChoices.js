@@ -10,13 +10,6 @@ const GameChoices = (props) => {
             >
                 Tic Tac Toe
             </div>
-            <div
-                id="b2"
-                className="game-choice"
-                onClick={() => props.onGameSelect('blackjack')}
-            >
-                Black Jack
-            </div>
         </div>
     );
 };

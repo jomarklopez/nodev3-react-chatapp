@@ -368,19 +368,20 @@ input {
 
 /* GAME CHOICES STYLES */
 .game-choices-container {
-    display: grid;
-    grid-template-columns: 200px 200px;
-    grid-template-rows: 150px;
-    grid-gap: 5px;
-
+    display: flex;
+    justify-content: center;
     margin: 0 auto;
 }
 
 .game-choices-container .game-choice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    width: 150px;
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.8);
     font-size: 1rem;
-    text-align: center;
 
     background-color: white;
     border: none;
@@ -397,8 +398,10 @@ input {
 
 .choose__btns-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+
+    margin-bottom: 5px;
 }
 
 .xButtonContainer,
@@ -410,8 +413,10 @@ input {
     display: flex;
     margin: 0;
 }
+
 .choose__btns-container button {
     width: 25px;
+    outline: none;
     border-radius: 5px;
     border: 1px solid cornflowerblue;
     background-color: corn;

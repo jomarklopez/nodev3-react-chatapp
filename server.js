@@ -3,9 +3,15 @@ const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server, { wsEngine: 'ws' })
 const Filter = require('bad-words')
+
 const { addUser, updateUser,removeUser, getUser, getUsersInRoom } = require('./js/utils/users')
 const { generateMessage } = require('./js/utils/messages')
-const { addPlayer, updatePlayer,removePlayer,getPlayer,getPlayersInRoom,checkWin } = require('./js/utils/tictactoe')
+const { addPlayer, updatePlayer, removePlayer, getPlayer, getPlayersInRoom } = require('./js/utils/players')
+const { 
+	incrementMatchTurn,
+	updateMoveset,
+	getMoveset,
+	checkWin} = require('./js/utils/tictactoe')
 
 const port = process.env.PORT || 3001
 
@@ -28,13 +34,41 @@ io.on('connection', (socket) => {
 			roomname: user.room,
 			users: getUsersInRoom(user.room, undefined)
 		})
-
 		// Send two messages to client, one welcoming the user and another notifying the users in the room
 
-		socket.emit('message', generateMessage('Welcome to Chat', 'Admin'))
+		socket.emit('message', generateMessage(`Welcome to ${user.room} Chatroom`, 'Admin'))
 
 		socket.broadcast.to(user.room).emit('message', generateMessage(`${user.username} has joined!`, 'Admin'))
 		callback()
+	})
+
+	socket.on('disconnect', () => {
+		// Remove user from room and leave gameroom if user is in one
+		console.log('Disconnected!')
+		const user = removeUser(socket.id)
+
+		// Determine if user is currently in a gameroom
+		
+		if (user) {
+			if (user.gameroom) {
+				// Broadcast to players in the gameroom that user has left the game
+				io.to(user.room).emit('message', generateMessage(`${user.username} has left ${user.gameroom}`, 'Game Master'))
+
+				// Send data to other users in gameroom
+				io.to(user.gameroom).emit('playersUpdate', getPlayersInRoom(user.gameroom))
+
+				// Update gameroom details
+				io.to(user.gameroom).emit('gameRoomDetails', {
+					gameroom: user.gameroom,
+					users: getPlayersInRoom(user.gameroom)
+				})
+			}
+			io.to(user.room).emit('message', generateMessage(`${user.username} has left the room!`, 'Admin'))
+			io.to(user.room).emit('roomDetails', {
+				roomname: user.room,
+				users: getUsersInRoom(user.room, undefined)
+			})
+		}
 	})
 
 	socket.on('newMessage', (newMessage, callback) => {
@@ -52,19 +86,9 @@ io.on('connection', (socket) => {
 		callback()
 	})
 
-	socket.on('disconnect', () => {
-		console.log('Disconnected!')
-		const user = removeUser(socket.id)
-		if (user) {
-			io.to(user.room).emit('message', generateMessage(`${user.username} has left the room!`, 'Admin'))
-			io.to(user.room).emit('roomDetails', {
-				roomname: user.room,
-				users: getUsersInRoom(user.room, undefined)
-			})
-		}
-	})
-
 	socket.on('joinGameRoom', ({ gameroom }, callback) => {
+		// TODO: Check if user has data in the database
+
 		// Update user data to include gameroom name let other sockets know that player has joined a game
 		const { user, updateError } = updateUser({ id: socket.id, gameroom })
 
@@ -96,10 +120,6 @@ io.on('connection', (socket) => {
 	})
 
 	socket.on('leaveGameRoom', (callback) => {
-		// Get the current user data
-		const currentUser = getUser(socket.id)
-		
-		const gameroom = currentUser.gameroom
 		// Remove gameroom from user data
 		const { user, error } = updateUser({ id: socket.id, gameroom: undefined })
 
@@ -111,25 +131,31 @@ io.on('connection', (socket) => {
 		}
 
 		if (player) {
-
 			// Broadcast to players in the gameroom that user has left the game
-			io.to(user.room).emit('message', generateMessage(`${user.username} has left ${gameroom}`, 'Game Master'))
+			io.to(user.room).emit('message', generateMessage(`${user.username} has left ${player.gameroom}`, 'Game Master'))
 
 			// Send data to other users in gameroom
-			io.to(gameroom).emit('playersUpdate', getPlayersInRoom(gameroom))
+			io.to(player.gameroom).emit('playersUpdate', getPlayersInRoom(player.gameroom))
 
 			// Update gameroom details
-			io.to(gameroom).emit('gameRoomDetails', {
-				gameroom,
-				users: getPlayersInRoom(gameroom)
+			io.to(player.gameroom).emit('gameRoomDetails', {
+				gameroom: player.gameroom,
+				users: getPlayersInRoom(player.gameroom)
 			})
 		}
 		callback()
 	})
 
 	/* TIC TAC TOE EVENTS */
+	
+	socket.on('initGameMoveset', (gameroom, callback) => {
+		socket.emit('gameMovesetUpdate', getMoveset(gameroom)[gameroom])
+		callback()
+	})
+
 	socket.on('setPlayerSymbol', (symbol, callback) => {
-		const { player, error } = updatePlayer({ id: socket.id, symbol: symbol })
+		// Add symbol and moveset to player exclusive to tictactoegame
+		const { player, error } = updatePlayer({ id: socket.id, symbol: symbol, moves: [] })
 
 		if (error) {
 			return callback(error)
@@ -142,18 +168,43 @@ io.on('connection', (socket) => {
 		callback()
 	})
 
-	socket.on('newMove', (data, callback) => {
+	socket.on('newMove', (move, callback) => {
 		// Get the user
-		const user = getUser(socket.id)
+		const currentPlayer = getPlayer(socket.id)
+		const matchTurn = getMoveset(currentPlayer.gameroom)['matchTurn']
 
-		if ((data.matchMoves % 2 != 0) && data.move.chosenSymbol === 'X') {
-			io.to(user.gameroom).emit('gameMoves', { matchMoves: data.matchMoves+1, move: data.move})
+		if ((matchTurn % 2 === 0) && currentPlayer.symbol === 'x') {
+			// update player moves
+			const { player, error } = updatePlayer({ id: socket.id, moves: [...currentPlayer.moves, move] })
+			
+			if (error) {
+				return callback(error)
+			}
 
-		} else if ((data.matchMoves % 2 == 0) && data.move.chosenSymbol === 'O') {
-			io.to(user.gameroom).emit('gameMoves', { matchMoves: data.matchMoves+1, move: data.move })
+		} else if ((matchTurn % 2 !== 0) && currentPlayer.symbol === 'o') {
+
+			const { player, error } = updatePlayer({ id: socket.id, moves: [...currentPlayer.moves, move] })
+
+			if (error) {
+				return callback(error)
+			}
+
 		} else {
-			return callback('It\'s the other player\'s turn!')
+			return callback('Not yet your turn!')
 		}
+
+		// update game moves
+		const moveset = updateMoveset(currentPlayer.gameroom, move, currentPlayer.symbol)
+		// send player moves to client
+		io.to(currentPlayer.gameroom).emit('playersUpdate', getPlayersInRoom(currentPlayer.gameroom))
+		// send game moves to client
+		io.to(currentPlayer.gameroom).emit('gameMovesetUpdate', moveset[currentPlayer.gameroom])
+
+		// Check if there is a winner 
+		if (checkWin(currentPlayer.moves)) {
+			return io.to(currentPlayer.gameroom).emit('gameOver', currentPlayer.username)
+		}
+		incrementMatchTurn(currentPlayer.gameroom)
 		callback()
 	})
 

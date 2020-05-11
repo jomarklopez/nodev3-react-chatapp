@@ -454,5 +454,20 @@ input {
     cursor: pointer;
 }
 
-.grid-item :hover {
+.endgame__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.playAgain__btn {
+    display: block;
+    cursor: pointer;
+    padding: 12px;
+    background: cornflowerblue;
+    border: none;
+    color: white;
+    font-size: 16px;
+    align-self: end;
+    margin: 10px 0px 0px 10px;
 }

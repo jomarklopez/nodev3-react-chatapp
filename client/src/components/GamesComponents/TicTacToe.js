@@ -35,6 +35,8 @@ const TicTacToe = (props) => {
         matchWinner: null
     });
 
+    // Listens for updates on players data which includes their symbols and usernames
+
     useEffect(() => {
         console.log(playersData);
         socket.on('playersUpdate', (playersData) => {
@@ -45,7 +47,9 @@ const TicTacToe = (props) => {
         };
     });
 
+    // Listens for updates on the gamemoveset
     useEffect(() => {
+        // On first render set initial gamemoveset to render gameboard
         if (gameMoveset == null && playersData[0]) {
             // Initialize gamemoveset from server on first render after receiving playersData
             socket.emit('initGameMoveset', playersData[0].gameroom, (error) => {
@@ -64,9 +68,13 @@ const TicTacToe = (props) => {
         };
     });
 
+    // Listens for endgame and winner from the server
     useEffect(() => {
         socket.on('gameOver', (player) => {
-            alert(player + ' WON!');
+            setMatchState({
+                matchOver: true,
+                matchWinner: player
+            });
         });
         return () => {
             socket.off('gameOver');
@@ -75,20 +83,7 @@ const TicTacToe = (props) => {
 
     // SOCKET FUNCTIONS
 
-    const sendPlayerMove = (move) => {
-        console.log(gameMoveset[move]);
-        if (gameMoveset[move] !== ' ') {
-            return alert("Can't place there!");
-        } else {
-            socket.emit('newMove', move, (error) => {
-                if (error) {
-                    alert(error);
-                }
-                console.log('The move was delivered');
-            });
-        }
-    };
-
+    // Send the player's chosen symbol to server
     const setPlayerSymbol = (symbol) => {
         // Check first if player has already selected a symbol
         const player = playersData.filter(
@@ -108,6 +103,34 @@ const TicTacToe = (props) => {
         }
     };
 
+    // Checks if there is no symbol on selected grid, then send move to server
+    const sendPlayerMove = (move) => {
+        if (gameMoveset[move] !== ' ') {
+            return alert("Can't place there!");
+        } else {
+            socket.emit('newMove', move, (error) => {
+                if (error) {
+                    alert(error);
+                }
+                console.log('The move was delivered');
+            });
+        }
+    };
+
+    // Reset game
+    const newGame = () => {
+        socket.emit('newGame', (error) => {
+            if (error) {
+                alert(error);
+            }
+            setMatchState({
+                matchOver: false,
+                matchWinner: null
+            });
+            setPlayersData([]);
+        });
+    };
+
     // RENDER FUNCTIONS
     // TODO SHOW WHOSE TURN IT IS
     const renderChooseButtons = () => {
@@ -118,7 +141,7 @@ const TicTacToe = (props) => {
             <>
                 <div className="xButtonContainer">
                     <button
-                        type="choose__btn"
+                        className="choose__btn"
                         onClick={() => setPlayerSymbol('x')}
                         disabled={xPlayer[0] ? true : false}
                     >
@@ -128,7 +151,7 @@ const TicTacToe = (props) => {
                 </div>
                 <div className="oButtonContainer">
                     <button
-                        type="choose__btn"
+                        className="choose__btn"
                         onClick={() => setPlayerSymbol('o')}
                         disabled={oPlayer[0] ? true : false}
                     >
@@ -139,6 +162,7 @@ const TicTacToe = (props) => {
             </>
         );
     };
+
     const renderButtons = () => {
         if (gameMoveset) {
             return (
@@ -150,7 +174,10 @@ const TicTacToe = (props) => {
                                 key={index}
                                 className="grid-item"
                                 onClick={() => {
-                                    sendPlayerMove(index);
+                                    // If match is not over, send move to server
+                                    if (!matchState.matchOver) {
+                                        sendPlayerMove(index);
+                                    }
                                 }}
                             >
                                 <p>{content}</p>
@@ -164,9 +191,28 @@ const TicTacToe = (props) => {
         }
     };
 
+    const renderEndGame = () => {
+        if (matchState.matchOver) {
+            return (
+                <div className="endgame__container">
+                    <h2>{matchState.matchWinner} won!</h2>
+                    <div className="playAgain__container">
+                        <button
+                            className="playAgain__btn"
+                            onClick={() => newGame()}
+                        >
+                            Play Again!
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+    };
+
     return (
         <>
             <div className="tictactoe__container">
+                {renderEndGame()}
                 <div className="choose__btns-container">
                     {renderChooseButtons()}
                 </div>

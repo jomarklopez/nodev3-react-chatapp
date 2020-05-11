@@ -11,7 +11,9 @@ const {
 	incrementMatchTurn,
 	updateMoveset,
 	getMoveset,
-	checkWin} = require('./js/utils/tictactoe')
+	resetMoveset,
+	checkWin
+} = require('./js/utils/tictactoe')
 
 const port = process.env.PORT || 3001
 
@@ -125,12 +127,15 @@ io.on('connection', (socket) => {
 
 		// Remove player from player data
 		const player = removePlayer(socket.id)
-		
+
 		if (error) {
 			return callback(error)
 		}
 
 		if (player) {
+			// Reset game data of tictactoe
+			resetMoveset(player.gameroom)
+
 			// Broadcast to players in the gameroom that user has left the game
 			io.to(user.room).emit('message', generateMessage(`${user.username} has left ${player.gameroom}`, 'Game Master'))
 
@@ -146,8 +151,22 @@ io.on('connection', (socket) => {
 		callback()
 	})
 
-	/* TIC TAC TOE EVENTS */
-	
+	socket.on('newGame', (callback) => {
+		// Reset player data
+		const { player, error } = updatePlayer({ id: socket.id, symbol: null, moves: [] })
+
+		if (error) {
+			return callback(error)
+		}
+
+		// Reset gameboard data
+		resetMoveset(player.gameroom)
+
+		socket.emit('playersUpdate', getPlayersInRoom(player.gameroom))
+		socket.emit('gameMovesetUpdate', getMoveset(player.gameroom)[player.gameroom])
+		callback()
+	})
+
 	socket.on('initGameMoveset', (gameroom, callback) => {
 		socket.emit('gameMovesetUpdate', getMoveset(gameroom)[gameroom])
 		callback()
@@ -200,10 +219,13 @@ io.on('connection', (socket) => {
 		// send game moves to client
 		io.to(currentPlayer.gameroom).emit('gameMovesetUpdate', moveset[currentPlayer.gameroom])
 
-		// Check if there is a winner 
-		if (checkWin(currentPlayer.moves)) {
-			return io.to(currentPlayer.gameroom).emit('gameOver', currentPlayer.username)
-		}
+		// Check if there is a winner, then after a small delay, send the winner to clients in gameroom
+		setTimeout(() => {
+			if (checkWin(currentPlayer.moves)) {
+				return io.to(currentPlayer.gameroom).emit('gameOver', currentPlayer.username)
+			}
+		},500)
+
 		incrementMatchTurn(currentPlayer.gameroom)
 		callback()
 	})

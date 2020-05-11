@@ -53,6 +53,11 @@ const getMoveset = (gameroom) => {
 	}
 }
 
+const resetMoveset = (gameroom) => {
+	const moveset = movesets.find((moveset) => gameroom in moveset)
+	movesets.splice(movesets.indexOf(moveset),1)
+	return movesets
+}
 
 const checkWin = (playerMoves) => {
 	const horizontalCheckPatterns = [
@@ -115,6 +120,7 @@ module.exports = {
 	addMoveset,
 	updateMoveset,
 	getMoveset,
+	resetMoveset,
 	incrementMatchTurn,
 	checkWin
 }

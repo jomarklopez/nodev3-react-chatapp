@@ -15,7 +15,7 @@ const {
 	checkWin
 } = require('./js/utils/tictactoe')
 
-const port = process.env.PORT || 3001
+const port = process.env.PORT || 3002
 
 io.on('connection', (socket) => {
 	console.log('New WebSocket connection')

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import socket from '../socket';
 import ChatroomContainer from '../ChatroomComponents/ChatroomContainer';
-import UserContext from '../UserContext';
+import UserContext from '../userContext';
 
 const HomePage = (props) => {
     // Upon mounting, join the specified room

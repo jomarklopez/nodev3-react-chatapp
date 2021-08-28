@@ -3,7 +3,7 @@ import Moment from 'react-moment';
 
 import socket from '../socket';
 import ChatInput from './ChatInput';
-import UserContext from '../UserContext';
+import UserContext from '../userContext';
 
 const Chatbox = (props) => {
     // Create a state containing initial values for displaying the chatbox

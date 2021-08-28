@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 
-import UserContext from '../UserContext';
+import UserContext from '../userContext';
 import socket from '../socket';
 import GameChoices from './GameChoices';
 import TicTacToe from './TicTacToe';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 import socket from '../socket';
-import UserContext from '../UserContext';
+import UserContext from '../userContext';
 
 const TicTacToe = (props) => {
     /**
